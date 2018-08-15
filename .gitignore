@@ -1,0 +1,15 @@
+*.swp
+*.swo
+
+# Logs
+logs
+*.log
+.env
+# Dependency directory
+node_modules
+
+# Debug log from npm
+npm-debug.log
+
+# truffle build directory
+build/
