@@ -8,6 +8,7 @@ module.exports = function (deployer, network, accounts) {
     }).then(function (token_instanse) {
     	// 1535760000 - 1.09.2018
     	// 1541030400 - 1.11.2018
+    	// 0xadf28828d53c60f8BA8f43802eB4aF2eF538f8a1, 1535760000, 1541030400, 0xbafb633a044DF0b67DDd15AB1CDB2959d8999898
         return deployer.deploy(PreSale, token_instanse.address, 1535760000, 1541030400, accounts[8]).then(function () {
             return PreSale.deployed();
         }).then(function (presale_instanse) {

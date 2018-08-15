@@ -9,7 +9,7 @@ contract TokenSale is Ownable {
     uint256 public startTime;
     uint256 public endTime;
     uint256 constant dec = 10 ** 8;
-    uint256 public tokensToSale = 200000000 * 10 ** 8;
+    uint256 public tokensToSale = 500000000 * 10 ** 8;
     // address where funds are collected
     address public wallet;
     // one token per one rate

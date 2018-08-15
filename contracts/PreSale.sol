@@ -9,7 +9,7 @@ contract PreSale is Ownable {
     uint256 public startTime;
     uint256 public endTime;
     uint256 constant dec = 10 ** 8;
-    uint256 public tokensToSale = 300000000 * 10 ** 8;
+    uint256 public tokensToSale = 500000000 * 10 ** 8;
     // address where funds are collected
     address public wallet;
     // one token per one rate
@@ -19,11 +19,6 @@ contract PreSale is Ownable {
     uint256 public weiRaised;
     uint256 public minTokensToSale = 200 * dec;
 
-    uint256 timeBonus1 = 30;
-    uint256 timeBonus2 = 20;
-    uint256 timeBonus3 = 10;
-    uint256 timeStaticBonus = 0;
-
     // Round bonuses
     uint256 bonus1 = 20;
     uint256 bonus2 = 30;
@@ -31,9 +26,9 @@ contract PreSale is Ownable {
     uint256 bonus4 = 50;
 
     // Amount bonuses
-    uint256 amount1 = 0;
-    uint256 amount2 = 3 * dec;
-    uint256 amount3 = 4 * dec;
+    uint256 amount1 = 0 * dec;
+    uint256 amount2 = 2 * dec;
+    uint256 amount3 = 3 * dec;
     uint256 amount4 = 5 * dec;
 
 
@@ -56,11 +51,6 @@ contract PreSale is Ownable {
         require(now > startTime && now < endTime);
         require(tokenSupply <= tokensToSale);
         _;
-    }
-
-    function setStaticBonus(
-        uint256 _newStaticBonus) onlyOwner public {
-        timeStaticBonus = _newStaticBonus;
     }
 
     function setMinTokensToSale(
@@ -90,26 +80,15 @@ contract PreSale is Ownable {
         bonus4 = _newBonus4;
     }
 
-    function getTimeBonus() public view returns (uint256) {
-        if(now < startTime + 1 days) { // Round X
-            return timeBonus1;
-        } else if(now >= startTime + 1 days && now < startTime + 16 days) { // Round 1
-            return timeBonus2;
-        } else if(now >= startTime + 16 days && now < startTime + 15 days) { // Round 2
-            return timeBonus3;
-        } else if(now >= startTime + 15 days && now < endTime) { // Round 3
-            return timeStaticBonus;
-        }
-    }
 
     function getBonus(uint256 _value) internal view returns (uint256) {
-        if(_value >= amount1 && _value < amount2) { 
+        if(_value > amount1 && _value <= amount2) { 
             return bonus1;
-        } else if(_value >= amount2 && _value < amount3) {
+        } else if(_value > amount2 && _value <= amount3) {
             return bonus2;
-        } else if(_value >= amount3 && _value < amount4) {
+        } else if(_value > amount3 && _value <= amount4) {
             return bonus3;
-        } else if(_value >= amount4) {
+        } else if(_value > amount4) {
             return bonus4;
         }
     }
@@ -142,17 +121,15 @@ contract PreSale is Ownable {
         require(beneficiary != address(0));
         uint256 weiAmount = (msg.value).div(10 ** 10);
         uint256 all = 100;
-        uint256 timeBonusNow = getTimeBonus();
         // calculate token amount to be created
         uint256 tokens = weiAmount.mul(rate);
         require(tokens >= minTokensToSale);
         uint256 bonusNow = getBonus(tokens);
-        uint256 tokensSumBonus = tokens.add(tokens.mul(timeBonusNow).div(all));
-        tokensSumBonus = tokensSumBonus.add(tokens.mul(bonusNow).div(all));
-        require(tokensToSale > tokensSumBonus.add(token.totalSupply()));
+        tokens = tokens.mul(bonusNow).div(all);
+        require(tokensToSale > tokens.add(token.totalSupply()));
         weiRaised = weiRaised.add(msg.value);
-        token.mint(beneficiary, tokensSumBonus);
-        emit TokenPurchase(msg.sender, beneficiary, weiAmount, tokensSumBonus);
+        token.mint(beneficiary, tokens);
+        emit TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
 
         wallet.transfer(msg.value);
     }
