@@ -24,16 +24,34 @@ contract TokenSale is Ownable {
     uint256 timeBonus3 = 10;
     uint256 timeStaticBonus = 0;
 
-    // Round bonuses
-    uint256 bonus1 = 10;
-    uint256 bonus2 = 20;
-    uint256 bonus3 = 30;
-    uint256 bonus4 = 40;
+    // Round 1 bonuses
+    uint256 bonus1_1 = 15;
+    uint256 bonus1_2 = 25;
+    uint256 bonus1_3 = 35;
+    uint256 bonus1_4 = 45;
+
+    // Round 2 bonuses
+    uint256 bonus2_1 = 10;
+    uint256 bonus2_2 = 20;
+    uint256 bonus2_3 = 30;
+    uint256 bonus2_4 = 40;
+
+    // Round 3 bonuses
+    uint256 bonus3_1 = 10;
+    uint256 bonus3_2 = 15;
+    uint256 bonus3_3 = 25;
+    uint256 bonus3_4 = 35;
+
+    // Round 4 bonuses
+    uint256 bonus4_1 = 5;
+    uint256 bonus4_2 = 10;
+    uint256 bonus4_3 = 20;
+    uint256 bonus4_4 = 30;
 
     // Amount bonuses
     uint256 amount1 = 0;
-    uint256 amount2 = 3 * dec;
-    uint256 amount3 = 4 * dec;
+    uint256 amount2 = 2 * dec;
+    uint256 amount3 = 3 * dec;
     uint256 amount4 = 5 * dec;
 
     constructor(
@@ -57,11 +75,6 @@ contract TokenSale is Ownable {
         _;
     }
 
-    function setStaticBonus(
-        uint256 _newStaticBonus) onlyOwner public {
-        timeStaticBonus = _newStaticBonus;
-    }
-
     function setMinTokensToSale(
         uint256 _newMinTokensToSale) onlyOwner public {
         minTokensToSale = _newMinTokensToSale;
@@ -78,38 +91,64 @@ contract TokenSale is Ownable {
         amount4 = _newAmount4;
     }
 
-    function setBonuses(
-        uint256 _newBonus1,
-        uint256 _newBonus2,
-        uint256 _newBonus3,
-        uint256 _newBonus4) onlyOwner public {
-        bonus1 = _newBonus1;
-        bonus2 = _newBonus2;
-        bonus3 = _newBonus3;
-        bonus4 = _newBonus4;
-    }
-
-    function getTimeBonus() public view returns (uint256) {
-        if(now < startTime + 1 days) { // Round X
-            return timeBonus1;
-        } else if(now >= startTime + 1 days && now < startTime + 16 days) { // Round 1
-            return timeBonus2;
-        } else if(now >= startTime + 16 days && now < startTime + 15 days) { // Round 2
-            return timeBonus3;
-        } else if(now >= startTime + 15 days && now < endTime) { // Round 3
-            return timeStaticBonus;
-        }
-    }
 
     function getBonus(uint256 _value) internal view returns (uint256) {
         if(_value >= amount1 && _value < amount2) { 
-            return bonus1;
+            return bonus1_1;
         } else if(_value >= amount2 && _value < amount3) {
-            return bonus2;
+            return bonus1_2;
         } else if(_value >= amount3 && _value < amount4) {
-            return bonus3;
+            return bonus1_3;
         } else if(_value >= amount4) {
-            return bonus4;
+            return bonus1_4;
+        }
+    }
+
+    function getBonus2(uint256 _value) internal view returns (uint256) {
+        if(_value >= amount1 && _value < amount2) { 
+            return bonus2_1;
+        } else if(_value >= amount2 && _value < amount3) {
+            return bonus2_2;
+        } else if(_value >= amount3 && _value < amount4) {
+            return bonus2_3;
+        } else if(_value >= amount4) {
+            return bonus2_4;
+        }
+    }
+
+    function getBonus3(uint256 _value) internal view returns (uint256) {
+        if(_value >= amount1 && _value < amount2) { 
+            return bonus3_1;
+        } else if(_value >= amount2 && _value < amount3) {
+            return bonus3_2;
+        } else if(_value >= amount3 && _value < amount4) {
+            return bonus3_3;
+        } else if(_value >= amount4) {
+            return bonus3_4;
+        }
+    }
+
+    function getBonus4(uint256 _value) internal view returns (uint256) {
+        if(_value >= amount1 && _value < amount2) { 
+            return bonus4_1;
+        } else if(_value >= amount2 && _value < amount3) {
+            return bonus4_2;
+        } else if(_value >= amount3 && _value < amount4) {
+            return bonus4_3;
+        } else if(_value >= amount4) {
+            return bonus4_4;
+        }
+    }
+
+    function getTimeBonus(uint256 _value) public view returns (uint256) {
+        if(now < startTime + 61 days) { // Round 1
+            return getBonus(_value);
+        } else if(now >= startTime + 61 days && now < startTime + 120 days) { // Round 2
+            return getBonus2(_value);
+        } else if(now >= startTime + 120 days && now < startTime + 181 days) { // Round 3
+            return getBonus3(_value);
+        } else if(now >= startTime + 181 days && now < endTime) { // Round 4
+            return getBonus4(_value);
         }
     }
 
@@ -141,13 +180,11 @@ contract TokenSale is Ownable {
         require(beneficiary != address(0));
         uint256 weiAmount = (msg.value).div(10 ** 10);
         uint256 all = 100;
-        uint256 timeBonusNow = getTimeBonus();
+        uint256 timeBonusNow = getTimeBonus(weiAmount);
         // calculate token amount to be created
         uint256 tokens = weiAmount.mul(rate);
         require(tokens >= minTokensToSale);
-        uint256 bonusNow = getBonus(tokens);
         uint256 tokensSumBonus = tokens.add(tokens.mul(timeBonusNow).div(all));
-        tokensSumBonus = tokensSumBonus.add(tokens.mul(bonusNow).div(all));
         require(tokensToSale > tokensSumBonus.add(token.totalSupply()));
         weiRaised = weiRaised.add(msg.value);
         token.mint(beneficiary, tokensSumBonus);

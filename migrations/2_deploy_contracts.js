@@ -14,8 +14,8 @@ module.exports = function (deployer, network, accounts) {
         }).then(function (presale_instanse) {
             token_instanse.setSaleAgent(presale_instanse.address);
 	        // 1541030400 - 1.11.2018
-	    	// 1546300800 - 1.01.2019
-            return deployer.deploy(TokenSale, token_instanse.address, 1541030400, 1546300800, accounts[8]).then(function () {
+	    	// 1561939200 - 1.07.2019
+            return deployer.deploy(TokenSale, token_instanse.address, 1541030400, 1561939200, accounts[8]).then(function () {
             	return TokenSale.deployed();
 	        }).then(function (tokensale_instanse) {
 	            token_instanse.setSaleAgent2(tokensale_instanse.address);
